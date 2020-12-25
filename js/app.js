@@ -1,41 +1,82 @@
-// Enemies our player must avoid
-var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+const PLAYER_START_POSUTION = {x: 200, y: 380};
+const STEP_Y = 80;
+const STEP_X = 100;
+const FIRST_ROW = 60;
+const BUGS_START_POSUTION = {x:-200, y: [FIRST_ROW, FIRST_ROW + STEP_Y, FIRST_ROW + STEP_Y*2, FIRST_ROW + STEP_Y*3]};
+const allEnemies = [];
+const MIN_SPEED = 100;
+const MAX_SPEED = 700;
+const CANVAS_WIDTH = 500;
+const BUG_SIZE =70;
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+const Enemy = function(x,y,speed,player){
     this.sprite = 'images/enemy-bug.png';
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.player = player;
 };
-
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+    this.x += this.speed * dt;
+    if (this.x > CANVAS_WIDTH){
+        this.x = BUGS_START_POSUTION.x;
+    }
+    this.handleCollision();
 };
-
-// Draw the enemy on the screen, required method for game
+Enemy.prototype.handleCollision = function() {
+    if (Math.abs(this.x - this.player.x)<BUG_SIZE  &&
+        Math.abs(this.y - this.player.y)<BUG_SIZE) {
+        alert('You lose!');
+        this.player.resetPosution();
+        };
+};
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+const Player = function(x,y){
+    this.sprite = 'images/char-boy.png';
+    this.x = x;
+    this.y = y;
+};
+Player.prototype.update = function(dt) {
+    if (this.y < 0){
+        setTimeout(()=>{
+            alert("You win!");
+            this.resetPosution();
+        },0)
+    };
+};
+Player.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+Player.prototype.handleInput = function(key){
+    if (key==="left" && this.x>0){
+        this.x-=STEP_X;
+    }if (key === "right" && this.x<CANVAS_WIDTH-STEP_X){
+        this.x+=STEP_X;
+    }if (key === "down" && this.y<PLAYER_START_POSUTION.y){
+        this.y+=STEP_Y;
+    }if (key === "up" && this.y>0){
+        this.y-=STEP_Y;
+    };
+};
+Player.prototype.resetPosution = function(){
+    this.y = PLAYER_START_POSUTION.y;
+    this.x = PLAYER_START_POSUTION.x;
+};
 
+let player = new Player(PLAYER_START_POSUTION.x,PLAYER_START_POSUTION.y);
+BUGS_START_POSUTION.y.forEach(function(y){
+    allEnemies.push(new Enemy(BUGS_START_POSUTION.x, y, getRandomSpeed(MIN_SPEED,MAX_SPEED),player))
+ });
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+function getRandomSpeed(min, max) {
+    return Math.random() * (max - min) + min;
+};
 
-
-
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
+    const allowedKeys = {
         37: 'left',
         38: 'up',
         39: 'right',
