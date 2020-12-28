@@ -4,7 +4,6 @@ const STEP_X = 102;
 const BUGS_PADDING = 18;
 const BUGS_START_POSITION = {
   x: -200,
-  y: [1, 3, 4].map((rowNumber) => rowNumber * STEP_Y - BUGS_PADDING),
 };
 const MIN_SPEED = 100;
 const MAX_SPEED = 700;
